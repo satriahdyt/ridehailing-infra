@@ -1,0 +1,71 @@
+version: "2"
+
+services:
+  tracker:
+    image: ridehailing
+    command:
+      - start-tracker
+    environment:
+      JAEGER_AGENT_HOST: jaeger
+      TRACKER_PORT: "80"
+      POSTGRES_HOST: postgres
+      NATS_URL: "nats://nats:4222"
+    expose:
+      - 80
+    ports:
+      - 3000:80
+
+  position:
+    image: ridehailing
+    command:
+      - start-position
+    environment:
+      JAEGER_AGENT_HOST: jaeger
+      POSITION_PORT: "80"
+      POSTGRES_HOST: postgres
+      NATS_URL: "nats://nats:4222"
+    expose:
+      - 80
+    ports:
+      - 3001:80
+
+  monitoring:
+    image: ridehailing
+    command:
+      - start-monitoring
+    environment:
+      JAEGER_AGENT_HOST: jaeger
+      TRACKER_HOST: tracker
+      TRACKER_PORT: "80"
+      POSITION_HOST: position
+      POSITION_PORT: "80"
+      MONITORING_PORT: "80"
+    expose:
+      - 80
+    ports:
+      - 3002:80
+
+  nats:
+    image: nats:1.1.0-linux
+    container_name: nats
+
+  postgres:
+    image: postgres:9.5
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ridehailing
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.14
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    ports:
+      - 16686:16686
+
+volumes:
+  pgdata:
+    driver: local
