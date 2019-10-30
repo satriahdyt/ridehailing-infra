@@ -2,7 +2,7 @@ const https = require("http");
 
 function makeRequest() {
   return new Promise((resolve, reject) => {
-    const req = https.request("http://localhost:30001", res => {
+    const req = https.request("http://172.17.123.248:30001", res => {
       res.once("data", datas => {
         const data = JSON.parse(datas);
         resolve(data[1].ip);
@@ -23,8 +23,8 @@ function delay(time) {
   });
 }
 
-const MAX_REQUEST = 200;
-const DELAY = 100;
+const MAX_REQUEST = 30;
+const DELAY = 500;
 
 async function normal() {
   while(1) {
